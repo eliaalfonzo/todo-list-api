@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Req, Get, Query, Param, UseGuards, BadRequestException, Put } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiBody } from '@nestjs/swagger';
 
 @ApiTags('Tasks') // Categoría en Swagger
 @ApiBearerAuth('JWT-auth') // Indica que requiere JWT
@@ -11,6 +11,19 @@ export class TasksController {
 
   // Crear tarea
   @ApiOperation({ summary: 'Crear una nueva tarea' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        nombre: { type: 'string', example: 'Programación Orientada a Objetos' },
+        descripcion: { type: 'string', example: 'Realizar una Infografía sobre la POO' },
+        storyPoints: { type: 'number', example: 5 },
+        fechaEntrega: { type: 'string', example: '2026-02-15' },
+        assignedTo: { type: 'number', example: 1 },
+      },
+      required: ['nombre', 'assignedTo'],
+    },
+  })
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() body: any, @Req() req: any) {
@@ -57,6 +70,20 @@ export class TasksController {
 
   // Actualizar tarea
   @ApiOperation({ summary: 'Actualizar una tarea existente (excepto ID y creador)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        nombre: { type: 'string', example: 'Actualizar nombre de la tarea' },
+        descripcion: { type: 'string', example: 'Nueva descripción actualizada' },
+        story_points: { type: 'number', example: 5 },
+        estado: { type: 'string', example: 'EN_PROGRESO' },
+        fecha_entrega: { type: 'string', example: '2026-03-01' },
+        id_usuario_asignado: { type: 'number', example: 3 },
+      },
+      required: [], // todos opcionales salvo restricciones lógicas
+    },
+  })
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   async update(
@@ -68,6 +95,15 @@ export class TasksController {
 
   // Asociar categoría a tarea
   @ApiOperation({ summary: 'Asociar una categoría a una tarea existente' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        categoryId: { type: 'number', example: 1 },
+      },
+      required: ['categoryId'],
+    },
+  })
   @UseGuards(JwtAuthGuard)
   @Post(':id/categories')
   async addCategory(

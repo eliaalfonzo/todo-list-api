@@ -3,7 +3,7 @@ import { Controller, Post, Body, Res, Get, Req, UseGuards } from '@nestjs/common
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import type { Response } from 'express';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 
 @ApiTags('Auth') // Agrupa los endpoints en Swagger bajo "Auth"
 @Controller('auth')
@@ -12,6 +12,16 @@ export class AuthController {
 
   // LOGIN
   @ApiOperation({ summary: 'Iniciar sesión y obtener token JWT' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', example: 'elia@gmail.com' },
+        password: { type: 'string', example: '1234' },
+      },
+      required: ['email', 'password'],
+    },
+  })
   @Post('login')
   async login(
     @Body() body: { email: string; password: string },

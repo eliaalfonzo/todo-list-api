@@ -6,8 +6,7 @@ import { AuthService } from './auth.service';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  // Usamos una instancia singleton de AuthService
-  private authService = new AuthService();
+  constructor(private readonly authService: AuthService) {}
 
   canActivate(context: ExecutionContext): boolean {
     const req = context.switchToHttp().getRequest();
@@ -24,13 +23,15 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       if (this.authService.isTokenRevoked(token)) {
-        throw new UnauthorizedException('Token revocado. Debe iniciar sesión de nuevo');
+        throw new UnauthorizedException(
+          'Token revocado. Debe iniciar sesión de nuevo',
+        );
       }
 
       const payload = jwt.verify(token, JWT_SECRET);
       req.user = payload;
       return true;
-    } catch (err) {
+    } catch {
       throw new UnauthorizedException('Token inválido o expirado');
     }
   }

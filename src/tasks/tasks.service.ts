@@ -12,8 +12,25 @@ export class TasksService {
     assignedTo: number;
     createdBy: number;
   }) {
+    // Validar storyPoints
     if (data.storyPoints !== undefined && data.storyPoints < 0) {
       throw new BadRequestException('Story points no puede ser menor a 0');
+    }
+
+    // Validar que el usuario asignado exista
+    const assignedUser = await query('SELECT id_usuario FROM usuario WHERE id_usuario = $1', [data.assignedTo]);
+    if (!assignedUser.rows.length) {
+      throw new BadRequestException('Usuario asignado no existe');
+    }
+
+    // Preparar fecha de entrega
+    let fechaEntrega: string | null = null;
+    if (data.fechaEntrega) {
+      const fecha = new Date(data.fechaEntrega);
+      if (isNaN(fecha.getTime())) {
+        throw new BadRequestException('Fecha de entrega inválida');
+      }
+      fechaEntrega = fecha.toISOString().split('T')[0];
     }
 
     const sql = `
@@ -28,7 +45,7 @@ export class TasksService {
       data.descripcion || null,
       data.storyPoints ?? null,
       'PENDIENTE',
-      data.fechaEntrega || null,
+      fechaEntrega,
       data.createdBy,
       data.assignedTo,
     ]);
@@ -38,16 +55,44 @@ export class TasksService {
 
   // Listar tareas con filtros opcionales
   async listTasks(filters?: { assignedTo?: number; estado?: string }) {
+    const estadosValidos = [
+      'PENDIENTE',
+      'EN_PROGRESO',
+      'EN_REVISION',
+      'COMPLETADO',
+    ];
+
+    // Validar estado si viene
+    if (filters?.estado !== undefined) {
+      if (!estadosValidos.includes(filters.estado)) {
+        throw new BadRequestException(
+          `Estado inválido. Valores permitidos: ${estadosValidos.join(', ')}`,
+        );
+      }
+    }
+
+    // Validar assignedTo si viene
+    if (filters?.assignedTo !== undefined) {
+      if (
+        typeof filters.assignedTo !== 'number' ||
+        Number.isNaN(filters.assignedTo)
+      ) {
+        throw new BadRequestException(
+          'assignedTo debe ser un número válido',
+        );
+      }
+    }
+
     let sql = 'SELECT * FROM tarea';
     const params: any[] = [];
     const conditions: string[] = [];
 
-    if (filters?.assignedTo) {
+    if (filters?.assignedTo !== undefined) {
       params.push(filters.assignedTo);
       conditions.push(`id_usuario_asignado = $${params.length}`);
     }
 
-    if (filters?.estado) {
+    if (filters?.estado !== undefined) {
       params.push(filters.estado);
       conditions.push(`estado = $${params.length}`);
     }
@@ -75,6 +120,14 @@ export class TasksService {
     const estadosValidos = ['PENDIENTE', 'EN_PROGRESO', 'EN_REVISION', 'COMPLETADO'];
     if (data.estado !== undefined && !estadosValidos.includes(data.estado)) {
       throw new BadRequestException(`Estado inválido. Valores permitidos: ${estadosValidos.join(', ')}`);
+    }
+
+    // Validar usuario asignado
+    if (data.id_usuario_asignado !== undefined) {
+      const assignedUser = await query('SELECT id_usuario FROM usuario WHERE id_usuario = $1', [data.id_usuario_asignado]);
+      if (!assignedUser.rows.length) {
+        throw new BadRequestException('Usuario asignado no existe');
+      }
     }
 
     // Validar fechaEntrega si viene

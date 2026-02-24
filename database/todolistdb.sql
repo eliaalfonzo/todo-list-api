@@ -1,14 +1,14 @@
--- ============================
--- CREACIÓN DE BASE DE DATOS
--- ============================
+-- BORRAR TABLAS EXISTENTES (para pruebas)
+-- =====================================
+-- Permite ejecutar este script varias veces desde cero
+-- Borra las tablas si existen para poder recrearlas sin errores de "ya existe"
+DROP TABLE IF EXISTS tarea_categoria CASCADE;
+DROP TABLE IF EXISTS comentario CASCADE;
+DROP TABLE IF EXISTS tarea CASCADE;
+DROP TABLE IF EXISTS categoria CASCADE;
+DROP TABLE IF EXISTS usuario CASCADE;
 
-CREATE DATABASE todolistdb;
-
-\c todolistdb;
-
--- ============================
 -- TABLA USUARIO
--- ============================
 
 CREATE TABLE usuario (
     id_usuario SERIAL PRIMARY KEY,
@@ -17,9 +17,7 @@ CREATE TABLE usuario (
     contrasena VARCHAR(255) NOT NULL
 );
 
--- ============================
 -- TABLA CATEGORIA
--- ============================
 
 CREATE TABLE categoria (
     id_categoria SERIAL PRIMARY KEY,
@@ -28,9 +26,7 @@ CREATE TABLE categoria (
     color_hex CHAR(7) NOT NULL
 );
 
--- ============================
 -- TABLA TAREA
--- ============================
 
 CREATE TABLE tarea (
     id_tarea SERIAL PRIMARY KEY,
@@ -55,9 +51,7 @@ CREATE TABLE tarea (
         CHECK (estado IN ('PENDIENTE', 'EN_PROGRESO', 'EN_REVISION', 'COMPLETADO'))
 );
 
--- ============================
 -- TABLA COMENTARIO
--- ============================
 
 CREATE TABLE comentario (
     id_comentario SERIAL PRIMARY KEY,
@@ -78,9 +72,7 @@ CREATE TABLE comentario (
         ON DELETE CASCADE
 );
 
--- ============================
 -- TABLA INTERMEDIA TAREA_CATEGORIA (N:M)
--- ============================
 
 CREATE TABLE tarea_categoria (
     id_tarea INTEGER NOT NULL,
@@ -98,3 +90,17 @@ CREATE TABLE tarea_categoria (
         REFERENCES categoria(id_categoria)
         ON DELETE CASCADE
 );
+
+-- DATA INICIAL: USUARIOS
+
+INSERT INTO usuario (nombre, email, contrasena) VALUES
+  ('Elia Alfonzo', 'elia@gmail.com', '$2b$10$gJ02BU3eLBMiMRNmCzwzt.3VynAoZIMJX4tyzxL7aLJVNyOyeTPJa'),
+  ('Marco Figueroa', 'marco@gmail.com', '$2b$10$/xUN.crRINHMnnKQpbmvj.6E9huKF7E/JQq8CwHrPjxaVqInENUfe'),
+  ('Franceli Millán', 'franceli@gmail.com', '$2b$10$3gZjA/H.SwQk4nf108oWReYmxd.UEucwen6YvRJlYaJaOlZP2REVq');
+
+-- DATA INICIAL: CATEGORÍAS
+
+INSERT INTO categoria (nombre, descripcion, color_hex) VALUES
+  ('Trabajo', 'Tareas del trabajo', '#FF0000'),
+  ('Universidad', 'Tareas y trabajos académicos', '#4287f5'),
+  ('Personal', 'Actividades personales', '#42f57b');
