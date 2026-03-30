@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 export class JwtAuthGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
     const authHeader = req.headers['authorization'];
 
@@ -22,16 +22,19 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      if (this.authService.isTokenRevoked(token)) {
+      // Verifica si el token fue revocado
+      const revoked = await this.authService.isTokenRevoked(token);
+      if (revoked) {
         throw new UnauthorizedException(
           'Token revocado. Debe iniciar sesión de nuevo',
         );
       }
 
+      // Verifica el token JWT
       const payload = jwt.verify(token, JWT_SECRET);
       req.user = payload;
       return true;
-    } catch {
+    } catch (err) {
       throw new UnauthorizedException('Token inválido o expirado');
     }
   }

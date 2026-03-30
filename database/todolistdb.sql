@@ -94,9 +94,10 @@ CREATE TABLE tarea_categoria (
 -- DATA INICIAL: USUARIOS
 
 INSERT INTO usuario (nombre, email, contrasena) VALUES
-  ('Elia Alfonzo', 'elia@gmail.com', '$2b$10$gJ02BU3eLBMiMRNmCzwzt.3VynAoZIMJX4tyzxL7aLJVNyOyeTPJa'),
-  ('Marco Figueroa', 'marco@gmail.com', '$2b$10$/xUN.crRINHMnnKQpbmvj.6E9huKF7E/JQq8CwHrPjxaVqInENUfe'),
-  ('Franceli Millán', 'franceli@gmail.com', '$2b$10$3gZjA/H.SwQk4nf108oWReYmxd.UEucwen6YvRJlYaJaOlZP2REVq');
+  ('Elia Alfonzo', 'elia@gmail.com', '$2b$10$gJ02BU3eLBMiMRNmCzwzt.3VynAoZIMJX4tyzxL7aLJVNyOyeTPJa'), -- elia@gmail.com -> 1234
+  ('Marco Figueroa', 'marco@gmail.com', '$2b$10$/xUN.crRINHMnnKQpbmvj.6E9huKF7E/JQq8CwHrPjxaVqInENUfe'), -- marco@gmail.com -> 1212
+  ('Franceli Millán', 'franceli@gmail.com', '$2b$10$3gZjA/H.SwQk4nf108oWReYmxd.UEucwen6YvRJlYaJaOlZP2REVq'), -- franceli@gmail.com -> 3333
+  ('Luis García', 'luis@gmail.com', '$2b$10$YT.V7H5PatuTfOxsaZT9k.tyzZN0GrXFlgT9KMHgWoKE8otOTaT86'); -- luis@gmail.com -> 1111
 
 -- DATA INICIAL: CATEGORÍAS
 

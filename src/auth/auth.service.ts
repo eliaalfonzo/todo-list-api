@@ -1,5 +1,7 @@
-// src/auth/auth.service.ts 
-import { Injectable } from '@nestjs/common';
+// src/auth/auth.service.ts
+import { Injectable, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { query } from '../db';
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
@@ -7,8 +9,7 @@ import { JWT_SECRET } from '../config';
 
 @Injectable()
 export class AuthService {
-  // Conjunto de tokens revocados (logout)
-  private revokedTokens: Set<string> = new Set();
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   // Valida usuario y contraseña (login)
   async validateUser(email: string, password: string) {
@@ -16,7 +17,6 @@ export class AuthService {
     const user = result.rows[0];
     if (!user) return null;
 
-    // Compara contraseña hasheada
     const match = await bcrypt.compare(password, user.contrasena);
     if (!match) return null;
 
@@ -34,13 +34,15 @@ export class AuthService {
     return jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: '1h' });
   }
 
-  // LOGOUT: revocar token
-  logout(token: string) {
-    this.revokedTokens.add(token);
+  // LOGOUT: revoca token y lo guarda en cache (blacklist)
+  async logout(token: string) {
+    // TTL 1 hora (coincide con expiración del JWT)
+    await this.cacheManager.set(token, true, 3600);
   }
 
   // Verifica si un token está revocado
-  isTokenRevoked(token: string) {
-    return this.revokedTokens.has(token);
+  async isTokenRevoked(token: string) {
+    const revoked = await this.cacheManager.get(token);
+    return !!revoked;
   }
 }

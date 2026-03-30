@@ -49,12 +49,23 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   async logout(@Req() req, @Res() res: Response) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader.split(' ')[1];
+    try {
+      const authHeader = req.headers['authorization'];
+      if (!authHeader) {
+        return res.status(400).json({ message: 'No se recibió token' });
+      }
 
-    this.authService.logout(token);
+      const token = authHeader.split(' ')[1];
+      if (!token) {
+        return res.status(400).json({ message: 'Token inválido' });
+      }
 
-    return res.status(200).json({ message: 'Logout exitoso' });
+      await this.authService.logout(token);
+
+      return res.status(200).json({ message: 'Logout exitoso' });
+    } catch {
+      return res.status(500).json({ message: 'Error interno al hacer logout' });
+    }
   }
 
   // TEST JWT
